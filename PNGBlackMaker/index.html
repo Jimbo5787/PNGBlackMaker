@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧蒙版產生器 2.0</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 頂部導航欄 -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <i class="fas fa-mask"></i>
+                <span data-i18n="app_title">智慧蒙版產生器 2.0</span>
+            </div>
+            <div class="nav-controls">
+                <button class="nav-btn" id="themeToggle" title="切換主題">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="language-selector">
+                    <button class="nav-btn" id="langToggle">
+                        <i class="fas fa-language"></i>
+                        <span class="lang-text">繁體中文</span>
+                    </button>
+                    <div class="language-dropdown" id="langDropdown">
+                        <button data-lang="zh_TW">繁體中文</button>
+                        <button data-lang="en_US">English</button>
+                    </div>
+                </div>
+                <button class="nav-btn" id="helpBtn" title="說明">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- 主要內容區 -->
+        <main class="main-content">
+            <!-- 左側控制面板 -->
+            <aside class="control-panel">
+                <div class="panel-section">
+                    <h3 data-i18n="image_control">圖片控制</h3>
+                    <label for="imageInput" class="btn btn-primary btn-block">
+                        <i class="fas fa-image"></i>
+                        <span data-i18n="load_image_button">載入圖片</span>
+                    </label>
+                    <input type="file" id="imageInput" accept=".png" hidden>
+                    
+                    <div class="image-info" id="imageInfo" style="display: none;">
+                        <p><strong data-i18n="resolution">解析度</strong>: <span id="imageResolution">-</span></p>
+                        <p><strong data-i18n="file_size">檔案大小</strong>: <span id="imageSize">-</span></p>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 data-i18n="canvas_ratio_label">畫布比例</h3>
+                    <select class="form-select" id="ratioSelect">
+                        <option value="original" data-i18n="ratio_original">原始尺寸</option>
+                        <option value="16:9">16:9</option>
+                        <option value="9:16">9:16</option>
+                        <option value="4:3">4:3</option>
+                        <option value="3:4">3:4</option>
+                        <option value="custom" data-i18n="ratio_custom">自訂</option>
+                    </select>
+                    
+                    <div id="customSizeInputs" style="display: none;">
+                        <div class="custom-size-group">
+                            <input type="number" id="customWidth" placeholder="寬度 (px)" class="form-input">
+                            <span>×</span>
+                            <input type="number" id="customHeight" placeholder="高度 (px)" class="form-input">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 data-i18n="background_color_label">背景預覽</h3>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="bgColor" value="white" checked>
+                            <span data-i18n="bg_white">白色</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="bgColor" value="black">
+                            <span data-i18n="bg_black">黑色</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 data-i18n="edit_options">編輯選項</h3>
+                    <label class="switch-label">
+                        <input type="checkbox" id="antialiasing" checked>
+                        <span class="switch"></span>
+                        <span data-i18n="antialiasing_label">邊緣抗鋸齒</span>
+                    </label>
+                </div>
+
+                <div class="panel-section">
+                    <h3 data-i18n="canvas_info">畫布資訊</h3>
+                    <div class="info-grid">
+                        <div>
+                            <span data-i18n="coordinates_label">座標</span>: 
+                            <span id="coordinates">(0, 0)</span>
+                        </div>
+                        <div>
+                            <span data-i18n="zoom_label">縮放</span>: 
+                            <span id="zoomLevel">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3 data-i18n="output_label">輸出管理</h3>
+                    <button class="btn btn-secondary btn-block" id="exportMaskBtn">
+                        <i class="fas fa-download"></i>
+                        <span data-i18n="output_mask_button">匯出純蒙版圖 (JPG)</span>
+                    </button>
+                    <button class="btn btn-secondary btn-block" id="exportCombinedBtn">
+                        <i class="fas fa-download"></i>
+                        <span data-i18n="output_combined_button">匯出加白底原圖 (JPG)</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- 右側預覽區 -->
+            <section class="preview-container">
+                <div class="canvas-wrapper" id="canvasWrapper">
+                    <canvas id="previewCanvas"></canvas>
+                    <div class="canvas-placeholder" id="placeholder">
+                        <i class="fas fa-image"></i>
+                        <p data-i18n="drag_drop_hint">拖曳 PNG 圖片到此處或點擊上方載入按鈕</p>
+                    </div>
+                    <div class="canvas-controls">
+                        <button class="zoom-btn" id="zoomInBtn" title="放大">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button class="zoom-btn" id="zoomOutBtn" title="縮小">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button class="zoom-btn" id="resetBtn" title="重置">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 說明對話框 -->
+    <div class="modal" id="helpModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-i18n="help_instructions">操作說明</h2>
+                <button class="modal-close" id="closeHelpBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content" data-i18n="help_content">
+                    <h3>操作說明</h3>
+                    <ol>
+                        <li><strong>載入圖片</strong>：點擊「載入圖片」按鈕或拖曳 PNG 檔案到預覽區。</li>
+                        <li><strong>調整畫布</strong>：
+                            <ul>
+                                <li>使用滑鼠滾輪縮放圖片</li>
+                                <li>按住左鍵拖曳移動圖片</li>
+                                <li>使用右下角的控制按鈕快速操作</li>
+                            </ul>
+                        </li>
+                        <li><strong>選擇比例</strong>：從下拉選單選擇預設比例或自訂尺寸。</li>
+                        <li><strong>預覽效果</strong>：切換黑白背景查看不同效果。</li>
+                        <li><strong>匯出圖片</strong>：
+                            <ul>
+                                <li>純蒙版圖：黑白剪影效果</li>
+                                <li>加白底原圖：原圖加上白色背景</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <h3>快捷鍵</h3>
+                    <ul>
+                        <li><kbd>+</kbd> / <kbd>-</kbd>：縮放圖片</li>
+                        <li><kbd>Space</kbd>：重置視圖</li>
+                        <li><kbd>Ctrl</kbd> + <kbd>S</kbd>：快速匯出</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 載入提示 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p data-i18n="processing">處理中...</p>
+    </div>
+
+    <script src="localization.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "Smart Mask Generator 2.0",
+  "short_name": "MaskGen 2.0",
+  "description": "智慧蒙版產生器 - 專業的圖片蒙版生成工具",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0066cc",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "lang": "zh-TW",
+  "categories": ["productivity", "photo", "utilities"]
+}
